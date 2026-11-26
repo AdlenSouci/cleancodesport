@@ -6,6 +6,7 @@ declare(strict_types=1);
 require __DIR__ . '/../vendor/autoload.php';
 
 use App\Application\ConsulterCours;
+use App\Application\ConsulterInscription;
 use App\Application\CreerCours;
 use App\Application\InscrireParticipant;
 use App\Application\ListerCours;
@@ -39,12 +40,14 @@ $creerCours = new CreerCours($repository, $generateur);
 $listerCours = new ListerCours($repository);
 $consulterCours = new ConsulterCours($repository);
 $inscrireParticipant = new InscrireParticipant($repository);
+$consulterInscription = new ConsulterInscription($repository);
 
 $app = CreerApplicationHttp::creer(
     $creerCours,
     $listerCours,
     $consulterCours,
     $inscrireParticipant,
+    $consulterInscription,
 );
 
 $app->run();

@@ -1,0 +1,11 @@
+meta {
+  name: Consulter une inscription
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/cours/{{coursId}}/inscriptions/{{participantId}}
+  body: none
+  auth: none
+}

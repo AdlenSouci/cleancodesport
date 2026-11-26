@@ -111,14 +111,39 @@ paths:
           application/json:
             schema: { $ref: "#/components/schemas/InscrireParticipant" }
       responses:
-        "200":
-          description: Inscription traitée (inscrit ou liste d'attente)
+        "201":
+          description: Inscription créée (inscrit ou liste d'attente)
+          headers:
+            Location:
+              description: URI de l'inscription créée
+              required: true
+              schema: { type: string, format: uri }
           content:
             application/json:
               schema: { $ref: "#/components/schemas/ResultatInscription" }
         "404": { $ref: "#/components/responses/Probleme" }
         "409": { $ref: "#/components/responses/Probleme" }
         "422": { $ref: "#/components/responses/Probleme" }
+
+  /cours/{coursId}/inscriptions/{participantId}:
+    get:
+      tags: [cours]
+      operationId: consulterInscription
+      summary: Consulter l'inscription d'un participant à un cours
+      description: |
+        Ressource désignée par l'en-tête Location de la création d'une inscription.
+        Donne le statut et, en liste d'attente, la position (1 = prochain promu).
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/CoursId"
+        - $ref: "#/components/parameters/ParticipantId"
+      responses:
+        "200":
+          description: Inscription trouvée
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Inscription" }
+        "404": { $ref: "#/components/responses/Probleme" }
 
 components:
   parameters:
@@ -127,6 +152,12 @@ components:
       in: path
       required: true
       description: Identifiant du cours
+      schema: { type: string, format: uuid }
+    ParticipantId:
+      name: participantId
+      in: path
+      required: true
+      description: Identifiant du participant
       schema: { type: string, format: uuid }
     Limit:
       name: limit
@@ -214,12 +245,26 @@ components:
 
     ResultatInscription:
       type: object
-      required: [statut]
+      required: [participantId, statut]
       properties:
+        participantId: { type: string, format: uuid }
         statut:
           type: string
           enum: [inscrit, en_liste_attente]
           description: Issue de l'inscription selon la capacité restante
+
+    Inscription:
+      type: object
+      required: [participantId, statut, position]
+      properties:
+        participantId: { type: string, format: uuid }
+        statut:
+          type: string
+          enum: [inscrit, en_liste_attente]
+        position:
+          type: [integer, "null"]
+          minimum: 1
+          description: Rang dans la liste d'attente ; null si le participant est inscrit
 
     Probleme:
       type: object

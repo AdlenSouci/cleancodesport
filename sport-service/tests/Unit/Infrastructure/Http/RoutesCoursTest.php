@@ -2,6 +2,7 @@
 namespace Tests\Unit\Infrastructure\Http;
 
 use App\Application\ConsulterCours;
+use App\Application\ConsulterInscription;
 use App\Application\CreerCours;
 use App\Application\InscrireParticipant;
 use App\Application\ListerCours;
@@ -27,6 +28,7 @@ final class RoutesCoursTest extends TestCase
             new ListerCours($repository),
             new ConsulterCours($repository),
             new InscrireParticipant($repository),
+            new ConsulterInscription($repository),
         );
         $this->requetes = new ServerRequestFactory();
     }
@@ -92,20 +94,77 @@ final class RoutesCoursTest extends TestCase
         $this->assertSame('Yoga', $corps['intitule']);
     }
 
-    public function test_post_inscription_renvoie_200_inscrit(): void
+    private const ALICE = '11111111-1111-4111-8111-111111111111';
+    private const BOB = '22222222-2222-4222-8222-222222222222';
+
+    private function unCoursDe(int $places): void
     {
         $this->appeler('POST', '/cours', [
             'intitule' => 'Yoga',
-            'places' => 10,
+            'places' => $places,
             'debut' => '2026-12-01T10:00:00+01:00',
         ]);
+    }
 
-        $reponse = $this->appeler('POST', '/cours/cours-1/inscriptions', [
-            'participantId' => '11111111-1111-4111-8111-111111111111',
-        ]);
+    public function test_post_inscription_cree_et_renvoie_201_avec_location(): void
+    {
+        $this->unCoursDe(10);
+
+        $reponse = $this->appeler('POST', '/cours/cours-1/inscriptions', ['participantId' => self::ALICE]);
+
+        $this->assertSame(201, $reponse->getStatusCode());
+        $this->assertSame('/cours/cours-1/inscriptions/' . self::ALICE, $reponse->getHeaderLine('Location'));
+        $this->assertSame(['participantId' => self::ALICE, 'statut' => 'inscrit'], $this->json($reponse));
+    }
+
+    public function test_post_inscription_au_dela_de_la_capacite_renvoie_201_en_liste_attente(): void
+    {
+        $this->unCoursDe(1);
+        $this->appeler('POST', '/cours/cours-1/inscriptions', ['participantId' => self::ALICE]);
+
+        $reponse = $this->appeler('POST', '/cours/cours-1/inscriptions', ['participantId' => self::BOB]);
+
+        $this->assertSame(201, $reponse->getStatusCode());
+        $this->assertSame(['participantId' => self::BOB, 'statut' => 'en_liste_attente'], $this->json($reponse));
+    }
+
+    public function test_get_inscription_en_liste_attente_donne_la_position(): void
+    {
+        $this->unCoursDe(1);
+        $this->appeler('POST', '/cours/cours-1/inscriptions', ['participantId' => self::ALICE]);
+        $this->appeler('POST', '/cours/cours-1/inscriptions', ['participantId' => self::BOB]);
+
+        $reponse = $this->appeler('GET', '/cours/cours-1/inscriptions/' . self::BOB);
 
         $this->assertSame(200, $reponse->getStatusCode());
-        $this->assertSame(['statut' => 'inscrit'], $this->json($reponse));
+        $this->assertSame(
+            ['participantId' => self::BOB, 'statut' => 'en_liste_attente', 'position' => 1],
+            $this->json($reponse)
+        );
+    }
+
+    public function test_le_location_de_l_inscription_designe_une_ressource_consultable(): void
+    {
+        $this->unCoursDe(10);
+        $creation = $this->appeler('POST', '/cours/cours-1/inscriptions', ['participantId' => self::ALICE]);
+
+        $reponse = $this->appeler('GET', $creation->getHeaderLine('Location'));
+
+        $this->assertSame(200, $reponse->getStatusCode());
+        $this->assertSame(
+            ['participantId' => self::ALICE, 'statut' => 'inscrit', 'position' => null],
+            $this->json($reponse)
+        );
+    }
+
+    public function test_get_inscription_d_un_participant_absent_renvoie_404(): void
+    {
+        $this->unCoursDe(10);
+
+        $reponse = $this->appeler('GET', '/cours/cours-1/inscriptions/' . self::ALICE);
+
+        $this->assertSame(404, $reponse->getStatusCode());
+        $this->assertSame('application/problem+json', $reponse->getHeaderLine('Content-Type'));
     }
 
     /** @param array<string, mixed>|null $corps */

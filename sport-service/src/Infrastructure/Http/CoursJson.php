@@ -32,9 +32,30 @@ final class CoursJson
         ];
     }
 
-    /** @return array{statut: string} */
-    public static function depuisResultat(ResultatInscription $resultat): array
+    /**
+     * Réponse du POST d'inscription : ce que renvoie le cas d'usage InscrireParticipant.
+     * @return array{participantId: string, statut: string}
+     */
+    public static function depuisResultat(string $participantId, ResultatInscription $resultat): array
     {
-        return ['statut' => $resultat->value];
+        return ['participantId' => $participantId, 'statut' => $resultat->value];
+    }
+
+    /**
+     * Représentation de la ressource inscription (GET) : le statut, plus le rang
+     * dans la liste d'attente (null si le participant est inscrit).
+     * @return array{participantId: string, statut: string, position: ?int}
+     */
+    public static function depuisInscription(Cours $cours, string $participantId): array
+    {
+        $statut = $cours->estInscrit($participantId)
+            ? ResultatInscription::Inscrit
+            : ResultatInscription::EnListeAttente;
+
+        return [
+            'participantId' => $participantId,
+            'statut' => $statut->value,
+            'position' => $cours->positionEnAttente($participantId),
+        ];
     }
 }

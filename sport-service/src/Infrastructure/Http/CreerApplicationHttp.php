@@ -3,7 +3,9 @@ namespace App\Infrastructure\Http;
 
 use App\Application\ConflitDeVersion;
 use App\Application\ConsulterCours;
+use App\Application\ConsulterInscription;
 use App\Application\CoursIntrouvable;
+use App\Application\InscriptionIntrouvable;
 use App\Application\CreerCours;
 use App\Application\EntreeInvalide;
 use App\Application\ErreurApplication;
@@ -28,12 +30,13 @@ final class CreerApplicationHttp
         ListerCours $listerCours,
         ConsulterCours $consulterCours,
         InscrireParticipant $inscrireParticipant,
+        ConsulterInscription $consulterInscription,
     ): \Slim\App {
         $app = AppFactory::create();
         $app->addBodyParsingMiddleware();
         $app->addRoutingMiddleware();
 
-        RoutesCours::enregistrer($app, $creerCours, $listerCours, $consulterCours, $inscrireParticipant);
+        RoutesCours::enregistrer($app, $creerCours, $listerCours, $consulterCours, $inscrireParticipant, $consulterInscription);
 
         $errorMiddleware = $app->addErrorMiddleware(false, true, true);
         $errorMiddleware->setDefaultErrorHandler(
@@ -60,6 +63,7 @@ final class CreerApplicationHttp
             $exception instanceof ParticipantDejaInscrit => [409, 'participant-deja-inscrit', $exception->getMessage()],
             $exception instanceof ConflitDeVersion => [409, 'conflit-de-version', $exception->getMessage()],
             $exception instanceof CoursIntrouvable => [404, 'cours-introuvable', $exception->getMessage()],
+            $exception instanceof InscriptionIntrouvable => [404, 'inscription-introuvable', $exception->getMessage()],
             $exception instanceof HttpNotFoundException => [404, 'introuvable', 'Ressource introuvable'],
             $exception instanceof ErreurDomaine => [400, 'erreur-domaine', $exception->getMessage()],
             $exception instanceof ErreurApplication => [400, 'erreur-application', $exception->getMessage()],

@@ -2,6 +2,7 @@
 namespace App\Infrastructure\Http;
 
 use App\Application\ConsulterCours;
+use App\Application\ConsulterInscription;
 use App\Application\CreerCours;
 use App\Application\EntreeInvalide;
 use App\Application\InscrireParticipant;
@@ -19,6 +20,7 @@ final class RoutesCours
         ListerCours $listerCours,
         ConsulterCours $consulterCours,
         InscrireParticipant $inscrireParticipant,
+        ConsulterInscription $consulterInscription,
     ): void {
         $app->get('/sante', function (Request $request, Response $response): Response {
             return self::json($response, ['statut' => 'ok']);
@@ -79,11 +81,26 @@ HTML;
             return self::json($response, CoursJson::depuisCours($cours));
         });
 
+        // Une inscription est une sous-ressource créée : 201 + Location vers la ressource créée
         $app->post('/cours/{coursId}/inscriptions', function (Request $request, Response $response, array $args) use ($inscrireParticipant): Response {
+            $coursId = (string) $args['coursId'];
             $corps = self::corpsJson($request);
             $participantId = self::chaineRequise($corps, 'participantId');
-            $resultat = $inscrireParticipant->executer((string) $args['coursId'], $participantId);
-            return self::json($response, CoursJson::depuisResultat($resultat));
+
+            $resultat = $inscrireParticipant->executer($coursId, $participantId);
+
+            return self::json(
+                $response
+                    ->withHeader('Location', "/cours/{$coursId}/inscriptions/{$participantId}")
+                    ->withStatus(201),
+                CoursJson::depuisResultat($participantId, $resultat),
+            );
+        });
+
+        $app->get('/cours/{coursId}/inscriptions/{participantId}', function (Request $request, Response $response, array $args) use ($consulterInscription): Response {
+            $participantId = (string) $args['participantId'];
+            $cours = $consulterInscription->executer((string) $args['coursId'], $participantId);
+            return self::json($response, CoursJson::depuisInscription($cours, $participantId));
         });
     }
 
