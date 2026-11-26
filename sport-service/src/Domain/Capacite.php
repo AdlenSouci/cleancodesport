@@ -15,3 +15,20 @@
 // - (à décider ensemble) un maximum ? Si oui, il se vérifie ici aussi, avec son test.
 //
 // Règle : pas de dépendance externe, pas d'accès à l'horloge.
+
+namespace App\Domain;
+
+final readonly class Capacite
+{
+    public function __construct(public int $places)
+    {
+        if ($places < 1) {
+            throw new CapaciteInvalide($places);
+        }
+    }
+    public function egale(self $autre): bool
+    {
+        return $this->places === $autre->places;
+    }
+  
+}

@@ -10,3 +10,10 @@
 //   d'un seul catch.
 //
 // Règle : aucun `use` de bibliothèque externe dans src/Domain.
+
+
+namespace App\Domain;
+
+abstract class ErreurDomaine extends \DomainException
+{
+}
