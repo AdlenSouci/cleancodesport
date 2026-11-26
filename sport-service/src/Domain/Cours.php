@@ -61,6 +61,11 @@ final class Cours
         $this->listeAttente = [];
     }
 
+    public function id(): string
+    {
+        return $this->id;
+    }
+
     public function inscrire(string $participantId): ResultatInscription
     {
         // 1. déjà inscrit ou déjà en attente → ParticipantDejaInscrit
