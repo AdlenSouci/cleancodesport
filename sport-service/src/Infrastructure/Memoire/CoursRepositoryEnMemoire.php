@@ -15,3 +15,26 @@
 // qui oublie d'enregistrer ne serait jamais détecté).
 // Un clone simple suffit : les propriétés de Cours sont des chaînes, des tableaux
 // et des objets immuables (Capacite, DateTimeImmutable).
+
+namespace App\Infrastructure\Memoire;
+
+use App\Application\CoursRepository;
+
+final class CoursRepositoryEnMemoire implements CoursRepository
+{
+    private array $cours = [];
+
+    public function enregistrer(Cours $cours): void
+    {
+        $this->cours[$cours->id()] = clone $cours;
+    }
+
+    public function parIdentifiant(string $id): ?Cours
+    {
+        if (!isset($this->cours[$id])) {
+            return null;
+        }
+        return clone $this->cours[$id];
+    }
+
+}
