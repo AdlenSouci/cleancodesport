@@ -1,17 +1,35 @@
 <?php
+namespace App\Application;
+
+use App\Domain\ResultatInscription;
+
 // InscrireParticipant — CAS D'USAGE 2 : l'action qui met l'INVARIANT à l'épreuve.
-//
-// À faire :
-// - namespace App\Application, classe FINAL
-// - dépendance par le constructeur : CoursRepository
-// - executer(string $coursId, string $participantId): ResultatInscription
-// - étapes :
-//     1. charger le cours (parIdentifiant) ; null → CoursIntrouvable
-//     2. appeler $cours->inscrire($participantId)   ← l'agrégat applique l'invariant
-//     3. ENREGISTRER le cours modifié                ← sans ça, rien n'est persisté
-//     4. renvoyer le résultat (Inscrit ou EnListeAttente)
-// - Le cas d'usage ORCHESTRE (charger, appeler, enregistrer) ; il ne DÉCIDE rien.
-//   Pas de « if (count(...) < capacite) » ici : ce serait l'invariant au mauvais endroit.
+// Il ORCHESTRE (charger, appeler le domaine, enregistrer) mais ne DÉCIDE rien :
+// la règle « inscrits ≤ capacité, sinon liste d'attente » vit dans l'agrégat Cours.
+final class InscrireParticipant
+{
+    private CoursRepository $coursRepository;
 
+    // Dépendance reçue par le constructeur : le cas d'usage ignore s'il parle
+    // à la mémoire (tests) ou à PostgreSQL (TP-02).
+    public function __construct(CoursRepository $coursRepository)
+    {
+        $this->coursRepository = $coursRepository;
+    }
 
+    public function executer(string $coursId, string $participantId): ResultatInscription
+    {
+        $cours = $this->coursRepository->parIdentifiant($coursId);
+        if ($cours === null) {
+            throw new CoursIntrouvable($coursId);
+        }
 
+        // l'agrégat applique l'invariant (et refuse un doublon)
+        $resultat = $cours->inscrire($participantId);
+
+        // sans cet enregistrement, l'inscription serait perdue
+        $this->coursRepository->enregistrer($cours);
+
+        return $resultat;
+    }
+}
