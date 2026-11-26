@@ -11,3 +11,13 @@
 //     parIdentifiant(string $id): ?Cours      → null si aucun cours avec cet id
 // - le `use App\Domain\Cours` est autorisé : Application dépend de Domain.
 //   L'inverse est interdit.
+
+namespace App\Application;
+
+use App\Domain\Cours;
+
+interface CoursRepository
+{
+    public function enregistrer(Cours $cours): void;
+    public function parIdentifiant(string $id): ?Cours;
+}
