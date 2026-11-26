@@ -100,6 +100,32 @@ final class CoursTest extends TestCase
         $this->assertTrue($cours->estEnAttente('bob'));
     }
 
+    public function test_la_position_en_attente_se_met_a_jour_apres_un_depart(): void
+    {
+        $cours = $this->unCours(1);
+        $cours->inscrire('alice');
+        $cours->inscrire('bob');
+        $cours->inscrire('carole');
+        $cours->desinscrire('bob');
+        $this->assertSame(1, $cours->positionEnAttente('carole'));
+
+    }
+
+    public function test_un_participant_absent_de_la_liste_d_attente_n_a_pas_de_position() : void 
+
+    {
+        $cours = $this->unCours(1);
+        $cours->inscrire('alice');
+        $cours->inscrire('bob');
+        $cours->inscrire('carole');
+        $cours->desinscrire('zoe');
+
+        $this->assertNull($cours->positionEnAttente('zoe'));
+        $this->assertNull($cours->positionEnAttente('alice'));
+        $this->assertSame(1, $cours->positionEnAttente('bob'));
+
+    }
+
     public function test_la_promotion_fait_passer_le_premier_en_attente(): void
     {
         $cours = $this->unCours(1);
@@ -137,4 +163,5 @@ final class CoursTest extends TestCase
         $this->assertTrue($cours->estEnAttente('bob'));
         $this->assertSame(1, $cours->nombreInscrits());
     }
+
 }

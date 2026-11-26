@@ -79,8 +79,8 @@ final class Cours
 
     public function desinscrire(string $participantId): void
     {
-        $this->inscrits = array_diff($this->inscrits, [$participantId]);
-        $this->listeAttente = array_diff($this->listeAttente, [$participantId]);
+        $this->inscrits = array_values(array_diff($this->inscrits, [$participantId]));
+        $this->listeAttente = array_values(array_diff($this->listeAttente, [$participantId]));
     }
 
     public function promouvoirPremierEnAttente(): ?string
@@ -110,9 +110,14 @@ final class Cours
     {
         return in_array($id, $this->listeAttente);
     }
-    public function positionEnAttente(string $id): int
+    public function positionEnAttente(string $id): ?int
     {
-        return array_search($id, $this->listeAttente) + 1;
+        $file = array_search($id, $this->listeAttente);
+        if ($file === false) {
+            return null;
+        }
+
+        return $file + 1 ;
     }
     
     
