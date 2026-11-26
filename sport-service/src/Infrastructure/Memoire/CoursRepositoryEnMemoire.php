@@ -37,4 +37,15 @@ final class CoursRepositoryEnMemoire implements CoursRepository
         return clone $this->cours[$id];
     }
 
+    /** @return list<Cours> */
+    public function paginer(int $limit, int $offset): array
+    {
+        $page = array_slice(array_values($this->cours), $offset, $limit);
+        return array_map(static fn (Cours $c) => clone $c, $page);
+    }
+
+    public function compter(): int
+    {
+        return count($this->cours);
+    }
 }

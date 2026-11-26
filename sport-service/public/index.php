@@ -1,20 +1,50 @@
 <?php
 declare(strict_types=1);
 
-// Point d'entrée HTTP TEMPORAIRE.
-// Il répond seulement à GET /sante, pour que le conteneur respecte le contrat
-// d'intégration du README (« GET /sante répond 200 »).
-// Au TP-02, il sera remplacé par la composition root : connexion PostgreSQL,
-// adapters, cas d'usage et application HTTP (Slim).
+// Composition root : câble les adapters et lance l'application HTTP (Slim).
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$chemin = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+use App\Application\ConsulterCours;
+use App\Application\CreerCours;
+use App\Application\InscrireParticipant;
+use App\Application\ListerCours;
+use App\Infrastructure\Http\CreerApplicationHttp;
+use App\Infrastructure\Postgres\CoursRepositoryPostgres;
+use App\Infrastructure\Uuid\GenerateurUuid;
 
-if ($_SERVER['REQUEST_METHOD'] === 'GET' && $chemin === '/sante') {
-    header('Content-Type: application/json');
-    echo json_encode(['statut' => 'ok']);
-    return;
+// Docker fournit DATABASE_URL=postgres://app:app@postgres:5432/sport
+$databaseUrl = getenv('DATABASE_URL') ?: 'postgres://app:app@localhost:5433/sport';
+$parts = parse_url($databaseUrl);
+if ($parts === false || !isset($parts['host'], $parts['path'])) {
+    throw new RuntimeException('DATABASE_URL invalide');
 }
 
-http_response_code(404);
+$pdo = new PDO(
+    sprintf(
+        'pgsql:host=%s;port=%d;dbname=%s',
+        $parts['host'],
+        $parts['port'] ?? 5432,
+        ltrim($parts['path'], '/')
+    ),
+    $parts['user'] ?? 'app',
+    $parts['pass'] ?? 'app',
+    [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+);
+
+$repository = new CoursRepositoryPostgres($pdo); // ← avant c'était EnMemoire
+$generateur = new GenerateurUuid();
+
+$creerCours = new CreerCours($repository, $generateur);
+$listerCours = new ListerCours($repository);
+$consulterCours = new ConsulterCours($repository);
+$inscrireParticipant = new InscrireParticipant($repository);
+
+$app = CreerApplicationHttp::creer(
+    $creerCours,
+    $listerCours,
+    $consulterCours,
+    $inscrireParticipant,
+);
+
+$app->run();

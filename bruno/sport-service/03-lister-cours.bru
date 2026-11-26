@@ -1,0 +1,11 @@
+meta {
+  name: Lister les cours
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/cours?limit=20&offset=0
+  body: none
+  auth: none
+}

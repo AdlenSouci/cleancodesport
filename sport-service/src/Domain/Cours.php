@@ -22,9 +22,55 @@ final class Cours
         $this->listeAttente = [];
     }
 
+    /**
+     * Relecture depuis la persistance (pas une règle métier).
+     * @param list<string> $inscrits
+     * @param list<string> $listeAttente
+     */
+    public static function reconstituer(
+        string $id,
+        string $intitule,
+        Capacite $capacite,
+        \DateTimeImmutable $debut,
+        array $inscrits,
+        array $listeAttente,
+    ): self {
+        $cours = new self($id, $intitule, $capacite, $debut);
+        $cours->inscrits = array_values($inscrits);
+        $cours->listeAttente = array_values($listeAttente);
+        return $cours;
+    }
+
     public function id(): string
     {
         return $this->id;
+    }
+
+    /** @return list<string> */
+    public function inscrits(): array
+    {
+        return $this->inscrits;
+    }
+
+    /** @return list<string> */
+    public function listeAttente(): array
+    {
+        return $this->listeAttente;
+    }
+
+    public function intitule(): string
+    {
+        return $this->intitule;
+    }
+
+    public function places(): int
+    {
+        return $this->capacite->places;
+    }
+
+    public function debut(): \DateTimeImmutable
+    {
+        return $this->debut;
     }
 
     //Inscrit la personne au cours choisi

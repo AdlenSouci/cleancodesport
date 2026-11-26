@@ -1,0 +1,21 @@
+meta {
+  name: Inscrire un participant
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/cours/{{coursId}}/inscriptions
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "participantId": "{{participantId}}"
+  }
+}

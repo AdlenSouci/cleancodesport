@@ -20,4 +20,9 @@ interface CoursRepository
 {
     public function enregistrer(Cours $cours): void;
     public function parIdentifiant(string $id): ?Cours;
+
+    /** @return list<Cours> */
+    public function paginer(int $limit, int $offset): array;
+
+    public function compter(): int;
 }

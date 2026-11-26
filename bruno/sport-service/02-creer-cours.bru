@@ -1,0 +1,29 @@
+meta {
+  name: Créer un cours
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/cours
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "intitule": "Yoga",
+    "places": 10,
+    "debut": "2026-12-01T10:00:00+01:00"
+  }
+}
+
+script:post-response {
+  if (res.status === 201 && res.body.id) {
+    bru.setEnvVar("coursId", res.body.id);
+  }
+}
