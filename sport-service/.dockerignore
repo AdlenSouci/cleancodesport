@@ -1,2 +1,5 @@
-node_modules
-.vitest
+vendor
+tests
+.phpunit.result.cache
+.phpunit.cache
+phpunit.xml
