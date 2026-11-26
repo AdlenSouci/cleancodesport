@@ -1,9 +1,22 @@
 <?php
-// ResultatInscription — ce que renvoie Cours::inscrire().
+// ParticipantDejaInscrit — levée quand un participant est déjà inscrit OU déjà en liste d'attente.
 //
 // À faire :
-// - namespace App\Domain
-// - une ENUM PHP (mot-clé `enum`, PHP 8.1+) avec deux cas :
-//     Inscrit        → le participant a une place
-//     EnListeAttente → le cours était plein, il attend
-// - Ce n'est PAS une erreur : être en liste d'attente est un cas normal du métier.
+// - namespace App\Domain, classe FINAL, hérite de ErreurDomaine
+// - message métier avec l'id du participant et celui du cours
+
+
+
+namespace App\Domain;
+
+
+final class ParticipantDejaInscrit extends ErreurDomaine
+{
+    public function __construct(string $idParticipant, string $idCours)
+    {
+        parent::__construct(
+            "Le participant {$idParticipant} est déjà inscrit au cours {$idCours}"
+        );
+    }
+    
+}
