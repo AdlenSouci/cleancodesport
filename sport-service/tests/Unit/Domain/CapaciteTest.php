@@ -19,8 +19,6 @@
 //
 // Lancement : composer test — tout doit être vert, en moins d'une seconde.
 
-
-// Règles invariantes, série R3
 namespace Tests\Unit\Domain;
 use App\Domain\Capacite;
 use App\Domain\CapaciteInvalide;
