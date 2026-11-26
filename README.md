@@ -4,9 +4,9 @@
 
 | Composant | Langage | Référent |
 |---|---|---|
-| auth-service | TypeScript | <prénom> |
-| sport-service | PHP 8.3 | <prénom> |
-| worker | C++ | <prénom> |
+| auth-service | TypeScript | <Enzo Carbonara> |
+| sport-service | PHP 8.3 | <Adlen Soucis> |
+| worker | C++ | <Jade Hurpet> |
 
 **Sujet n° 8 — Cours de sport.** Invariant : un cours ne dépasse pas sa capacité ;
 au-delà, l'inscription va en liste d'attente. Value object : `Capacite`.
