@@ -1,15 +1,7 @@
 <?php
-// ParticipantDejaInscrit — levée quand un participant est déjà inscrit OU déjà en liste d'attente.
-//
-// À faire :
-// - namespace App\Domain, classe FINAL, hérite de ErreurDomaine
-// - message métier avec l'id du participant et celui du cours
-
-
-
 namespace App\Domain;
 
-
+//classe qui lève l'erreur comme quoi le participant est déjà inscrit / déjà en liste d'attente
 final class ParticipantDejaInscrit extends ErreurDomaine
 {
     public function __construct(string $idParticipant, string $idCours)
