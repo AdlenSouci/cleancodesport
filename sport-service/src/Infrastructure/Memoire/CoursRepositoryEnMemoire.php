@@ -19,7 +19,7 @@
 namespace App\Infrastructure\Memoire;
 
 use App\Application\CoursRepository;
-
+use App\Domain\Cours;
 final class CoursRepositoryEnMemoire implements CoursRepository
 {
     private array $cours = [];

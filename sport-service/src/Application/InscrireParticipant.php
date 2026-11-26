@@ -15,31 +15,3 @@
 
 
 
-namespace App\Application;
-
-use App\Domain\Capacite;
-use App\Domain\Cours;
-
-final class CreerCours
-{
-    private CoursRepository $coursRepository;
-    private GenerateurIdentifiant $generateurIdentifiant;
-
-    public function __construct(
-        CoursRepository $coursRepository,
-        GenerateurIdentifiant $generateurIdentifiant
-    ) {
-        $this->coursRepository = $coursRepository;
-        $this->generateurIdentifiant = $generateurIdentifiant;
-    }
-
-    public function executer(string $intitule, int $places, \DateTimeImmutable $debut): Cours
-    {
-        $capacite = new Capacite($places);
-        $id = $this->generateurIdentifiant->nouveau();
-        $cours = new Cours($id, $intitule, $capacite, $debut);
-        $this->coursRepository->enregistrer($cours);
-
-        return $cours;
-    }
-}

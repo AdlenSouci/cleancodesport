@@ -6,3 +6,10 @@
 // À faire :
 // - namespace App\Application, `interface GenerateurIdentifiant`
 // - une méthode : nouveau(): string
+
+namespace App\Application;
+
+interface GenerateurIdentifiant
+{
+    public function nouveau(): string;
+}
